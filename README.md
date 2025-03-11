@@ -3,7 +3,7 @@
 Copyright Matthew Cherukara, 11 March 2025. See LICENSE.
 
 MATLAB code accompanying the paper
-- Cherukara MT, Hamdule S, Kawadler JM, Kirkham FJ, Shmueli K. Changes in Deep-Brain Magnetic Susceptibility and Motor Function in Children and Young People with Sickle Cell Anaemia. *UNDER REVIEW* (2025).
+- Cherukara MT, Hamdule S, Kawadler JM, Kirkham FJ, Shmueli K. Changes in Deep-Brain Magnetic Susceptibility and Motor Function in Children and Young People with Sickle Cell Anaemia. *IN PREPARATION* (2025).
 
 ## Dependencies
 
