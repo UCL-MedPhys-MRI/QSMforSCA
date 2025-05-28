@@ -17,13 +17,30 @@
 
 clearvars;
 
+%% Select Data
+
 % Load in the data
-load('SickleUK_GLMResults_QSM.mat')
+load('SickleUK_GLMResultsPegboard_QSM.mat')
 load('ROI_names.mat');
 
 % We only want to plot certain significant ROIs
-sign_rois = [1,2,3,4,6,10,12,13,14,15,16,17];
+sign_rois = [1,2,3,4,6,10,13,14,15,16,17];
 nrois = length(sign_rois);
+
+
+%% Process 
+
+% Nice ROI names, for displaying
+roi_names_nice = {' L. Caudate Nucleus';' R. Caudate Nucleus';...
+                  ' L. Globus Pallidus';' R. Globus Pallidus';...
+                  ' L. Putamen';' R. Putamen';...
+                  ' L. Thalamus';' R. Thalamus';...
+                  ' L. Pulvinar';' R. Pulvinar';...
+                  ' L. Subthalamic Nucleus';' R. Subthalamic Nucleus';...
+                  ' L. Substantia Nigra';' R. Substantia Nigra';...
+                  ' L. Red Nucleus';' R. Red Nucleus';...
+                  ' L. Dentate';'R. Dentate'};
+roi_names_nice = roi_names_nice(sign_rois);
 
 % Extract only the significant names
 roi_names = roi_names(sign_rois);
@@ -31,21 +48,24 @@ roi_names = roi_names(sign_rois);
 % Extract only the significant columns
 arr_Rsquared = arr_Rsquared(:,sign_rois);
 
-% Nice ROI names, for displaying
-roi_names_nice = {' L. Caudate Nucleus';' R. Caudate Nucleus';' L. Globus Pallidus';...
-                  ' R. Globus Pallidus';' R. Putamen';' R. Pulvinar';' R. Subthalamic Nucleus';...
-                  ' L. Substantia Nigra';' R. Substantia Nigra';' L. Red Nucleus';...
-                  ' R. Red Nucleus';' L. Dentate'};
-
 % Combine left and right pegboard scores
 arr_Rsquared(end+1,:) = arr_Rsquared(4,:) + arr_Rsquared(5,:);
 arr_Rsquared(4:5,:) = [];
+
+% Subtract variance explained by Age from that of Pegboard score
+arr_Rsquared(end,:) = arr_Rsquared(end,:) - arr_Rsquared(1,:);
+
+% Set any negative values equal to 0
+arr_Rsquared(arr_Rsquared < 0) = 0;
 
 % Unexplained variance
 arr_Rsquared(end+1,:) = ones(1,nrois) - sum(arr_Rsquared,1);
 
 % These are the names for the rows of "arr_Rsquared"
-var_names = {'Age'; 'Sex'; 'Group'; 'Pegboard'; 'Design_fluency'; 'Unexplained'};
+var_names = {'Age'; 'Sex'; 'Group'; 'Pegboard'; 'Unexplained'};
+
+
+%% Plot the Graph
 
 % Bar Chart
 figure('WindowStyle','Normal','Position',[100,200,1100,500]);
@@ -59,8 +79,8 @@ b(1).FaceColor = [147,  39,  44]./255;  % UCL Mid Red 100%
 b(2).FaceColor = [  0,  43,  85]./255;  % UCL Mid Blue 100%
 b(3).FaceColor = [143, 153,  62]./255;  % UCL Mid Green 100%
 b(4).FaceColor = [249, 190,   0]./255;  % UCL Yellow 100%
-b(5).FaceColor = [ 98,  32, 113]./255;  % UCL Mid Purple 90%
-b(6).FaceColor = [152, 143, 134]./255;  % UCL Grey 90%
+% b(5).FaceColor = [ 98,  32, 113]./255;  % UCL Mid Purple 90%
+b(5).FaceColor = [152, 143, 134]./255;  % UCL Grey 90%
 
 % Background colour
 % set(gcf,'color',[201, 147, 150]./255);
