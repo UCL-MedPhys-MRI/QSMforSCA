@@ -20,11 +20,11 @@ clearvars;
 %% Select Data
 
 % Load in the data
-load('SickleUK_GLMResultsPegboard_QSM.mat')
+load('SickleUK_GLMResultsPegboardRight_R2s.mat')
 load('ROI_names.mat');
 
 % We only want to plot certain significant ROIs
-sign_rois = [1,2,3,4,6,10,13,14,15,16,17];
+sign_rois = find(res_pv < 0.05);
 nrois = length(sign_rois);
 
 
@@ -48,9 +48,9 @@ roi_names = roi_names(sign_rois);
 % Extract only the significant columns
 arr_Rsquared = arr_Rsquared(:,sign_rois);
 
-% Combine left and right pegboard scores
-arr_Rsquared(end+1,:) = arr_Rsquared(4,:) + arr_Rsquared(5,:);
-arr_Rsquared(4:5,:) = [];
+% % Combine left and right pegboard scores
+% arr_Rsquared(end+1,:) = arr_Rsquared(4,:) + arr_Rsquared(5,:);
+% arr_Rsquared(4:5,:) = [];
 
 % Subtract variance explained by Age from that of Pegboard score
 arr_Rsquared(end,:) = arr_Rsquared(end,:) - arr_Rsquared(1,:);

@@ -34,6 +34,9 @@ n_rois = length(roi_names);
 load('SickleUK_QSMData.mat');
 n_subs = height(tbl_all);
 
+% Choose Modality name 'QSM' or 'R2s'
+mname = 'R2s';
+
 % Pre-allocate ROI name arrays
 roi_names_qsm = cell(size(roi_names));
 roi_names_r2s = cell(size(roi_names));
@@ -54,15 +57,15 @@ mdl = struct();
 
 % Create an empty array for holding the following p-values of each fitting
 % parameter (currently 6) 
-arr_results = ones(6,n_rois);
+arr_results = ones(5,n_rois);
 
 
 for rr = 1:n_rois
 
     rname = roi_names{rr};
 
-    % Specify model (change "QSM" to "R2s" to model R2-star)
-    modelspec = [strcat('R2s_',rname), ' ~ Sex + Group + Log_Age + Pegboard_L + Pegboard_R '];
+    % Specify model
+    modelspec = [strcat(mname,'_',rname), ' ~ Sex + Group + Log_Age + Pegboard_R '];
 
     % Fit GLM
     mdl.(rname) = fitglm(tbl_all,modelspec);
@@ -85,6 +88,8 @@ tbl_results.Properties.RowNames = mdl.(roi_names{1}).CoefficientNames;
 res_RS = zeros(n_rois,1);
 res_pv = zeros(n_rois,1);
 
+clc;
+
 for rr = 1:n_rois
 
     rname = roi_names{rr};
@@ -96,26 +101,30 @@ for rr = 1:n_rois
     res_RS(rr) = mdl.(rname).Rsquared.Adjusted;
     res_pv(rr) = coefTest(mdl.(rname));
 
-    % Print Model statistics
-    fprintf('%20s ',rname);
-    fprintf('adjusted R^2 = %f\t',res_RS(rr));
-    fprintf('p-value = %e \n',res_pv(rr));
-
-    % if any(sigCoefs(2:end))
-    %     sigCoefs(1) = false;
-    %     nameCoefs = mdl.(rname).CoefficientNames(sigCoefs)';
-    %     stats = [nameCoefs, num2cell(mdl.(rname).Coefficients.pValue(sigCoefs))]';
-    %     fprintf('%20s has significant covariance in',rname);
-    %     fprintf('\t%10s (%10.3g)',stats{:});
-    %     fprintf('.\n');
+    % if res_pv(rr) < 0.05
+    
+        % Print Model statistics
+        fprintf('\n%20s ',rname);
+        fprintf('adjusted R^2 = %f\t',res_RS(rr));
+        fprintf('p-value = %.2e \n',res_pv(rr));
+    
+    %     if any(sigCoefs(2:end))
+    %         sigCoefs(1) = false;
+    %         nameCoefs = mdl.(rname).CoefficientNames(sigCoefs)';
+    %         stats = [nameCoefs, num2cell(mdl.(rname).Coefficients.pValue(sigCoefs))]';
+    %         fprintf('%20s has significant covariance in',rname);
+    %         fprintf('\n%24s (%8.3g)',stats{:});
+    %         fprintf('.\n');
+    %     end
     % end
+
 end % rr = 1:n_rois
 
 
 %% Univariate Analysis for Variance Explained
 
 % Variables
-var_names = {'Log_Age'; 'Sex'; 'Group'; 'Pegboard_L'; 'Pegboard_R'};
+var_names = {'Log_Age'; 'Sex'; 'Group'; 'Pegboard_R'};
 n_var = length(var_names);
 
 % Pre-allocate array to store R^2 values
@@ -132,7 +141,7 @@ for vv = 1:n_var
         rname = roi_names{rr};
 
         % Specify model (change "QSM" to "R2s" for R2-star analysis)
-        modelspec = [strcat('R2s_',rname), ' ~ ', vname];
+        modelspec = [strcat(mname,'_',rname), ' ~ ', vname];
 
         % Fit GLM
         unimdl = fitglm(tbl_all,modelspec);
@@ -149,7 +158,7 @@ arr_Rsquared(arr_Rsquared < 0) = 0;
 
 
 %% Save the Results
-save('SickleUK_GLMResultsPegboard_R2s.mat','tbl_results','res_RS','res_pv','mdl','arr_Rsquared');
+save(strcat('SickleUK_GLMResultsPegboardRight_',mname,'.mat'),'tbl_results','res_RS','res_pv','mdl','arr_Rsquared');
 
 
 %% Calculate Regional Averages (for Table)
@@ -172,7 +181,7 @@ for rr = 1:n_rois
     rname = roi_names{rr};
 
     % Extract susceptibility for this ROI
-    vec_susc = tbl_all.(strcat('QSM_',rname));
+    vec_susc = tbl_all.(strcat(mname,'_',rname));
 
     % Separate HC and SCD values
     vec_hc = vec_susc(is_hc);
@@ -227,7 +236,7 @@ is_hc = strcmp(tbl_all.Group,'HC');
 for vv = 1:length(roi_names)
     
     % Pull out the data
-    vec_cogn = tbl_all.(strcat('QSM_',roi_names{vv}));
+    vec_cogn = tbl_all.(strcat(mname,'_',roi_names{vv}));
 
     % Do the t-test
     [h1, p1] = ttest2(vec_cogn(is_hc),vec_cogn(~is_hc));
