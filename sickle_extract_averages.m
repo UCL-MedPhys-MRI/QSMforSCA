@@ -18,7 +18,7 @@
 % 2024-01-19 (MTC). Added a section that averages out the two globus
 %       pallidus regions into a single ROI
 %
-% 2025-03-11 (MTC). Refactored and updated to be ready for release with the
+% 2025-06-17 (MTC). Refactored and updated to be ready for release with the
 %       paper
 
 clearvars;
@@ -37,7 +37,7 @@ roi_names = tbl_names.labelname(1:21);
 
 % Load the subject demographic data
 %       Note that subjects 17 and 34 are missing
-tbl_subs = readtable(strcat(dir_data,'SickleUK_SubjectData.csv'));
+tbl_subs = readtable('./SickleUK_SubjectData.csv');
 tbl_subs.Properties.RowNames = tbl_subs.Number;
 
 % Numbers
@@ -130,6 +130,43 @@ tbl_qsmdata = addvars(tbl_qsmdata,vec_gp_l_qsm,vec_gp_r_qsm,'NewVariableNames',{
 tbl_r2sdata = addvars(tbl_r2sdata,vec_gp_l_r2s,vec_gp_r_r2s,'NewVariableNames',{'R2s_Globus_pallidus_L';'R2s_Globus_pallidus_R'});
 
 
+%% Average Across the Basal Ganglia
+% Following Carpenter, 2016, we define basal ganglia as Caudate, Globus
+% Pallidus (int. + ext.), Putamen, Pulvinar, Substantia Nigra
+
+% List of ROI indices
+ind_bgl = [1,3,5,7,11,15];
+ind_bgr = [2,4,6,8,12,16];
+ind_bgt = [ind_bgl, ind_bgr];
+
+% Pull out sizes
+bgl_sz = arr_roi_size(:,ind_bgl);
+bgr_sz = arr_roi_size(:,ind_bgr);
+bgt_sz = arr_roi_size(:,ind_bgt);
+
+% Pull out QSM and R2s data
+bgl_qsm = arr_qsm_mean(:,ind_bgl);
+bgr_qsm = arr_qsm_mean(:,ind_bgr);
+bgt_qsm = arr_qsm_mean(:,ind_bgt);
+bgl_r2s = arr_r2s_mean(:,ind_bgl);
+bgr_r2s = arr_r2s_mean(:,ind_bgr);
+bgt_r2s = arr_r2s_mean(:,ind_bgt);
+
+% Calculate new mean values
+vec_bg_l_qsm = sum(bgl_sz.*bgl_qsm,2)./sum(bgl_sz,2);
+vec_bg_r_qsm = sum(bgr_sz.*bgr_qsm,2)./sum(bgr_sz,2);
+vec_bg_t_qsm = sum(bgt_sz.*bgt_qsm,2)./sum(bgt_sz,2);
+vec_bg_l_r2s = sum(bgl_sz.*bgl_r2s,2)./sum(bgl_sz,2);
+vec_bg_r_r2s = sum(bgr_sz.*bgr_r2s,2)./sum(bgr_sz,2);
+vec_bg_t_r2s = sum(bgt_sz.*bgt_r2s,2)./sum(bgt_sz,2);
+
+% Add data to the tables
+tbl_qsmdata = addvars(tbl_qsmdata,vec_bg_l_qsm,vec_bg_r_qsm,vec_bg_t_qsm,...
+                      'NewVariableNames',{'QSM_Basal_ganglia_L';'QSM_Basal_ganglia_R';'QSM_Basal_ganglia_T'});
+tbl_r2sdata = addvars(tbl_r2sdata,vec_bg_l_r2s,vec_bg_r_r2s,vec_bg_t_r2s,...
+                      'NewVariableNames',{'R2s_Basal_ganglia_L';'R2s_Basal_ganglia_R';'R2s_Basal_ganglia_T'});
+
+
 %% Finally Assembly of the Data
 
 % Merge the tables
@@ -137,5 +174,5 @@ tbl_all = join(tbl_subs,tbl_qsmdata,'Keys','Row');
 tbl_all = join(tbl_all,tbl_r2sdata,'Keys','Row');
 
 % Save the table
-writetable(tbl_all,strcat(dir_data,'SickleUK_QSMData_New.csv'),'WriteRowNames',true);
-save('SickleUK_QSMdata_New.mat','tbl_all');
+writetable(tbl_all,strcat(dir_data,'SickleUK_QSMData_BGanglia.csv'),'WriteRowNames',true);
+save('SickleUK_QSMdata_BGanglia.mat','tbl_all');

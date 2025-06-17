@@ -20,8 +20,8 @@ clearvars;
 %% Select Data
 
 % Load in the data
-load('SickleUK_GLMResultsPegboardRight_R2s.mat')
-load('ROI_names.mat');
+load('SickleUK_GLMResultsBG_QSM.mat')
+load('ROI_names_BG.mat');
 
 % We only want to plot certain significant ROIs
 sign_rois = find(res_pv < 0.05);
@@ -39,7 +39,8 @@ roi_names_nice = {' L. Caudate Nucleus';' R. Caudate Nucleus';...
                   ' L. Subthalamic Nucleus';' R. Subthalamic Nucleus';...
                   ' L. Substantia Nigra';' R. Substantia Nigra';...
                   ' L. Red Nucleus';' R. Red Nucleus';...
-                  ' L. Dentate';'R. Dentate'};
+                  ' L. Dentate';'R. Dentate';... %};
+                  ' L. Basal Ganglia';'R. Basal Ganglia';'Basal Ganglia'};
 roi_names_nice = roi_names_nice(sign_rois);
 
 % Extract only the significant names

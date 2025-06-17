@@ -27,15 +27,15 @@ clearvars
 %% Set-up Script Options
 
 % ROIs
-load('ROI_names.mat');
+load('ROI_names_BG.mat');
 n_rois = length(roi_names);
 
 % Load in data table
-load('SickleUK_QSMData.mat');
+load('SickleUK_QSMdata_BGanglia.mat');
 n_subs = height(tbl_all);
 
 % Choose Modality name 'QSM' or 'R2s'
-mname = 'R2s';
+mname = 'QSM';
 
 % Pre-allocate ROI name arrays
 roi_names_qsm = cell(size(roi_names));
@@ -57,7 +57,7 @@ mdl = struct();
 
 % Create an empty array for holding the following p-values of each fitting
 % parameter (currently 6) 
-arr_results = ones(5,n_rois);
+arr_results = ones(6,n_rois);
 
 
 for rr = 1:n_rois
@@ -65,7 +65,7 @@ for rr = 1:n_rois
     rname = roi_names{rr};
 
     % Specify model
-    modelspec = [strcat(mname,'_',rname), ' ~ Sex + Group + Log_Age + Pegboard_R '];
+    modelspec = [strcat(mname,'_',rname), ' ~ Sex + Group + Log_Age + Pegboard_R + Design_fluency '];
 
     % Fit GLM
     mdl.(rname) = fitglm(tbl_all,modelspec);
@@ -158,7 +158,7 @@ arr_Rsquared(arr_Rsquared < 0) = 0;
 
 
 %% Save the Results
-save(strcat('SickleUK_GLMResultsPegboardRight_',mname,'.mat'),'tbl_results','res_RS','res_pv','mdl','arr_Rsquared');
+save(strcat('SickleUK_GLMResultsBG_',mname,'.mat'),'tbl_results','res_RS','res_pv','mdl','arr_Rsquared');
 
 
 %% Calculate Regional Averages (for Table)
