@@ -22,14 +22,12 @@ clearvars;
 % Define UCL colors
 colour.g = [143, 153,  62]./255;  % UCL Mid Green 100%
 colour.p = [ 98,  32, 113]./255;  % UCL Mid Purple 90%
-colour.r = [147,  39,  44]./255;  % UCL Mid Red 100%
-colour.b = [  0,  43,  85]./255;  % UCL Mid Blue 100%
-colour.r60 = [179, 104, 107]./255;  % UCL Mid Red 60%
-colour.b60 = [102, 126, 153]./255;  % UCL Mid Blue 60%
+
+%% Input
 
 % Load the data
-load('SickleUK_QSMData.mat');
-load('ROI_names.mat');
+load('SickleUK_QSMdata_BGanglia.mat');
+load('ROI_names_BG.mat');
 
 % Data Quantities
 n_subs = height(tbl_all);
@@ -59,7 +57,6 @@ for rr = 1:n_rois
 end % for rr = 1:n_rois
 
 
-
 %% Box Plot Labels
 
 % Create Label arrays
@@ -67,7 +64,7 @@ label_hc = repmat(is_hc,1,n_rois);
 label_rois = repmat(1:n_rois,n_subs,1);
 
 % ROI titles
-roi_titles = {'L. Caudate';     'R. Caudate';...
+roi_titles = {'L. Caudate N.';  'R. Caudate N.';...
               'L. G.P.';        'R. G.P.';...
               'L. Putamen';     'R. Putamen';...
               'L. Thalamus';    'R. Thalamus';...
@@ -75,7 +72,37 @@ roi_titles = {'L. Caudate';     'R. Caudate';...
               'L. Subthal. N.'; 'R. Subthal. N.';...
               'L. S. Nigra';    'R. S. Nigra';...
               'L. Red N.';      'R. Red N.';...
-              'L. Dentate';     'R. Dentate'};
+              'L. Dentate';     'R. Dentate';...
+              'Basal Ganglia'};
+
+
+%% Sort the ROIs into 'basal ganglia' and non-basal ganglia 
+
+vec_neworder = [3,4,13,14,9,10,1,2,5,6,19,7,8,11,12,15:18];
+
+roi_titles = roi_titles(vec_neworder);
+mat_QSM = mat_QSM(:,vec_neworder);
+mat_R2s = mat_R2s(:,vec_neworder);
+
+
+%% Do significance testing for correlations
+
+% Pre-allocate results
+pval_QSM = zeros(n_rois,1);
+pval_R2s = zeros(n_rois,1);
+
+for rr = 1:n_rois
+
+    % Pull out the current set of susc and R2* values
+    vec_QSM = mat_QSM(:,rr);
+    vec_R2s = mat_R2s(:,rr);
+
+    % Do two-way t-test
+    [~,pval_QSM(rr)] = ttest2(vec_QSM(~is_hc),vec_QSM(is_hc));
+    [~,pval_R2s(rr)] = ttest2(vec_R2s(~is_hc),vec_R2s(is_hc));
+
+end % for rr = 1:n_rois 
+
 
 %% Box Plot of QSM Values
 
@@ -86,7 +113,7 @@ chi_min = min(mat_QSM(:));
 chi_max = max(mat_QSM(:));
 
 % Create figure
-figure('WindowStyle','normal','Position',[100,200,600+(50*n_rois),600]);
+f1 = figure('WindowStyle','normal','Position',[100,200,600+(50*n_rois),600]);
 
 % Beautiful box chart
 b1 = boxchart(label_rois(:),mat_QSM(:),'GroupByColor',label_hc(:));
@@ -94,6 +121,10 @@ box on; hold on;
 
 % Line at chi=0
 plot([0,n_rois+1],[0,0],'k--');
+
+% Lines separating basal ganglia
+plot([10.5,10.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',1.5);
+plot([11.5,11.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',2);
 
 % Labels and axes
 axis([0.5,n_rois+0.5,chi_min - (1*gsp),chi_max + (1*gsp)]);
@@ -106,20 +137,43 @@ b1(2).BoxFaceColor = colour.p;
 b1(1).MarkerColor = colour.g;
 b1(2).MarkerColor = colour.p;
 
+% Plot significance lines and stars
+for rr = 1:n_rois
+
+    if pval_QSM(rr) < 0.05
+
+        % Figure out the right height to put the line
+        sigline_y = max(mat_QSM(:,rr)) + (1.*gsp);
+        
+        % Plot the line
+        plot([rr-0.3,rr+0.3],[sigline_y,sigline_y],'k-','LineWidth',2);
+
+        % Display a star
+        text(rr,sigline_y+0.5*gsp,'*','HorizontalAlignment','center','FontSize',16);
+
+    end
+
+end % for rr = 1:n_rois 
+
 % Create the legend at the end
 legend('Healthy Controls','SCA Patients','','Location','SouthWest');
 
 
+%% Save the QSM plot
+
+exportgraphics(f1,'ROIbox_allBG_QSM.tif');
+
+
 %% Box Plot of R2-star Values
 
-gsp = 0.1; % spacing variable for the significance stars
+gsp = 0.75; % spacing variable for the significance stars
 
 % Max and min values for the y-axis
 chi_min = min(mat_R2s(:));
 chi_max = max(mat_R2s(:));
 
 % Create figure
-figure('WindowStyle','normal','Position',[100,300,600+(50*n_rois),600]);
+f2 = figure('WindowStyle','normal','Position',[100,300,600+(50*n_rois),600]);
 
 % Beautiful box chart
 b2 = boxchart(label_rois(:),mat_R2s(:),'GroupByColor',label_hc(:));
@@ -127,6 +181,10 @@ box on; hold on;
 
 % Line at chi=0
 plot([0,n_rois+1],[0,0],'k--');
+
+% Lines separating basal ganglia
+plot([10.5,10.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',1.5);
+plot([11.5,11.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',2);
 
 % Labels and axes
 axis([0.5,n_rois+0.5,chi_min - (1*gsp),chi_max + (1*gsp)]);
@@ -139,5 +197,27 @@ b2(2).BoxFaceColor = colour.p;
 b2(1).MarkerColor = colour.g;
 b2(2).MarkerColor = colour.p;
 
+% Plot significance lines and stars
+for rr = 1:n_rois
+
+    if pval_R2s(rr) < 0.05
+
+        % Figure out the right height to put the line
+        sigline_y = max(mat_R2s(:,rr)) + (1.*gsp);
+        
+        % Plot the line
+        plot([rr-0.3,rr+0.3],[sigline_y,sigline_y],'k-','LineWidth',2);
+
+        % Display a star
+        text(rr,sigline_y+0.5*gsp,'*','HorizontalAlignment','center','FontSize',16);
+
+    end
+
+end % for rr = 1:n_rois 
+
 % Create the legend at the end
 legend('Healthy Controls','SCA Patients','','Location','NorthEast');
+
+%% Save out the R2* plot
+
+exportgraphics(f2,'ROIbox_allBG_R2s.tif');

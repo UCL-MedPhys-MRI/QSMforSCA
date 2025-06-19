@@ -108,14 +108,14 @@ for rr = 1:n_rois
         fprintf('adjusted R^2 = %f\t',res_RS(rr));
         fprintf('p-value = %.2e \n',res_pv(rr));
     
-    %     if any(sigCoefs(2:end))
-    %         sigCoefs(1) = false;
-    %         nameCoefs = mdl.(rname).CoefficientNames(sigCoefs)';
-    %         stats = [nameCoefs, num2cell(mdl.(rname).Coefficients.pValue(sigCoefs))]';
-    %         fprintf('%20s has significant covariance in',rname);
-    %         fprintf('\n%24s (%8.3g)',stats{:});
-    %         fprintf('.\n');
-    %     end
+        if any(sigCoefs(2:end))
+            sigCoefs(1) = false;
+            nameCoefs = mdl.(rname).CoefficientNames(sigCoefs)';
+            stats = [nameCoefs, num2cell(mdl.(rname).Coefficients.pValue(sigCoefs))]';
+            fprintf('%20s has significant covariance in',rname);
+            fprintf('\n%24s (%8.3g)',stats{:});
+            fprintf('.\n');
+        end
     % end
 
 end % rr = 1:n_rois
@@ -124,7 +124,7 @@ end % rr = 1:n_rois
 %% Univariate Analysis for Variance Explained
 
 % Variables
-var_names = {'Log_Age'; 'Sex'; 'Group'; 'Pegboard_R'};
+var_names = {'Log_Age'; 'Sex'; 'Group'; 'Pegboard_R'; 'Design_fluency' };
 n_var = length(var_names);
 
 % Pre-allocate array to store R^2 values
@@ -210,7 +210,7 @@ tbl_av = table(roi_names,av_susc_hc,av_susc_ss,vec_pvals);
 is_hc = strcmp(tbl_all.Group,'HC');
 
 % Specify which variables we want to examine
-var_names = {'Age';'Pegboard_L';'Pegboard_R'};
+var_names = {'Age';'Pegboard_L';'Pegboard_R';'Design_fluency' };
 
 for vv = 1:length(var_names)
     
