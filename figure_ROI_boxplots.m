@@ -116,14 +116,14 @@ chi_max = max(mat_QSM(:));
 f1 = figure('WindowStyle','normal','Position',[100,200,600+(50*n_rois),600]);
 
 % Beautiful box chart
-b1 = boxchart(label_rois(:),mat_QSM(:),'GroupByColor',label_hc(:));
+b1 = boxchart(label_rois(:),mat_QSM(:),'GroupByColor',~label_hc(:));
 box on; hold on;
 
 % Line at chi=0
 plot([0,n_rois+1],[0,0],'k--');
 
 % Lines separating basal ganglia
-plot([10.5,10.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',1.5);
+plot([10.5,10.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',2);
 plot([11.5,11.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',2);
 
 % Labels and axes
@@ -155,8 +155,10 @@ for rr = 1:n_rois
 
 end % for rr = 1:n_rois 
 
+set(gca,'FontSize',16);
+
 % Create the legend at the end
-legend('Healthy Controls','SCA Patients','','Location','SouthWest');
+legend('Healthy Controls','SCA Subjects','','Location','SouthWest');
 
 
 %% Save the QSM plot
@@ -176,14 +178,14 @@ chi_max = max(mat_R2s(:));
 f2 = figure('WindowStyle','normal','Position',[100,300,600+(50*n_rois),600]);
 
 % Beautiful box chart
-b2 = boxchart(label_rois(:),mat_R2s(:),'GroupByColor',label_hc(:));
+b2 = boxchart(label_rois(:),mat_R2s(:),'GroupByColor',~label_hc(:));
 box on; hold on;
 
 % Line at chi=0
 plot([0,n_rois+1],[0,0],'k--');
 
 % Lines separating basal ganglia
-plot([10.5,10.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',1.5);
+plot([10.5,10.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',2);
 plot([11.5,11.5],[chi_min - (1*gsp),chi_max + (1*gsp)],'k:','LineWidth',2);
 
 % Labels and axes
@@ -215,8 +217,10 @@ for rr = 1:n_rois
 
 end % for rr = 1:n_rois 
 
+set(gca,'FontSize',16);
+
 % Create the legend at the end
-legend('Healthy Controls','SCA Patients','','Location','NorthEast');
+legend('Healthy Controls','SCA Subjects','','Location','SouthWest');
 
 %% Save out the R2* plot
 

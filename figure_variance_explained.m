@@ -40,7 +40,7 @@ roi_names_nice = {' L. Caudate Nucleus';' R. Caudate Nucleus';...
                   ' L. Substantia Nigra';' R. Substantia Nigra';...
                   ' L. Red Nucleus';' R. Red Nucleus';...
                   ' L. Dentate';'R. Dentate';... %};
-                  ' L. Basal Ganglia';'R. Basal Ganglia';'Basal Ganglia'};
+                  ' Basal Ganglia'};
 roi_names_nice = roi_names_nice(sign_rois);
 
 % Extract only the significant names
@@ -80,8 +80,8 @@ b(1).FaceColor = [147,  39,  44]./255;  % UCL Mid Red 100%
 b(2).FaceColor = [  0,  43,  85]./255;  % UCL Mid Blue 100%
 b(3).FaceColor = [143, 153,  62]./255;  % UCL Mid Green 100%
 b(4).FaceColor = [249, 190,   0]./255;  % UCL Yellow 100%
-% b(5).FaceColor = [ 98,  32, 113]./255;  % UCL Mid Purple 90%
-b(5).FaceColor = [152, 143, 134]./255;  % UCL Grey 90%
+b(5).FaceColor = [ 98,  32, 113]./255;  % UCL Mid Purple 90%
+b(6).FaceColor = [152, 143, 134]./255;  % UCL Grey 90%
 
 % Background colour
 % set(gcf,'color',[201, 147, 150]./255);
