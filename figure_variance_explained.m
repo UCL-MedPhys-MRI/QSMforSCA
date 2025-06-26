@@ -14,21 +14,17 @@
 %
 % 2025-03-11 (MTC). Refactored and brought into alignment with the other
 %       scripts in this folder, ready for the paper.
+%
+% 2025-06-26 (MTC). Completely redesigned this function to take the
+%       "leave-one-out" GLM analysis in order to quantify variance
+%       explained by each model parameter
 
 clearvars;
 
 %% Select Data
 
 % Load in the data
-load('SickleUK_GLMResultsBG_QSM.mat')
-load('ROI_names_BG.mat');
-
-% We only want to plot certain significant ROIs
-sign_rois = find(res_pv < 0.05);
-nrois = length(sign_rois);
-
-
-%% Process 
+load('SickleUK_GLMResults_VarExp.mat');
 
 % Nice ROI names, for displaying
 roi_names_nice = {' L. Caudate Nucleus';' R. Caudate Nucleus';...
@@ -39,54 +35,139 @@ roi_names_nice = {' L. Caudate Nucleus';' R. Caudate Nucleus';...
                   ' L. Subthalamic Nucleus';' R. Subthalamic Nucleus';...
                   ' L. Substantia Nigra';' R. Substantia Nigra';...
                   ' L. Red Nucleus';' R. Red Nucleus';...
-                  ' L. Dentate';'R. Dentate';... %};
+                  ' L. Dentate';'R. Dentate';...
                   ' Basal Ganglia'};
-roi_names_nice = roi_names_nice(sign_rois);
+
+% These are the names of the variables
+var_names = {'Age'; 'Sex'; 'Group'; 'Pegboard'; 'Design Fluency'; 'Unexplained'}; 
+
+
+%% Pull out only the ROIs where the whole model was significant
+
+% We only want to plot certain significant ROIs
+sign_rois = find(tbl_varexp.res_pv < 0.05);
+nrois = length(sign_rois);
 
 % Extract only the significant names
-roi_names = roi_names(sign_rois);
+roi_names_nice = roi_names_nice(sign_rois);
 
-% Extract only the significant columns
-arr_Rsquared = arr_Rsquared(:,sign_rois);
+% Table of significant values only
+tbl_sigrois = tbl_varexp(sign_rois,:);
+roi_names = tbl_sigrois.roi_names;
 
-% % Combine left and right pegboard scores
-% arr_Rsquared(end+1,:) = arr_Rsquared(4,:) + arr_Rsquared(5,:);
-% arr_Rsquared(4:5,:) = [];
 
-% Subtract variance explained by Age from that of Pegboard score
-arr_Rsquared(end,:) = arr_Rsquared(end,:) - arr_Rsquared(1,:);
+%% Process 
 
-% Set any negative values equal to 0
-arr_Rsquared(arr_Rsquared < 0) = 0;
+% Pull out the VE data
+arr_VE = [tbl_sigrois.VE_Log_Age, tbl_sigrois.VE_Sex, tbl_sigrois.VE_Group, tbl_sigrois.VE_Pegboard_R, tbl_sigrois.VE_Design_fluency];
 
-% Unexplained variance
-arr_Rsquared(end+1,:) = ones(1,nrois) - sum(arr_Rsquared,1);
+% Calculate unexplained variance
+vec_unexp = ones(nrois,1) - sum(arr_VE,2);
 
-% These are the names for the rows of "arr_Rsquared"
-var_names = {'Age'; 'Sex'; 'Group'; 'Pegboard'; 'Unexplained'};
+% Add it to the table and the array
+arr_VE(:,end+1) = vec_unexp;
+tbl_sigrois = addvars(tbl_sigrois,vec_unexp,'NewVariableNames','VE_Unexplained');
+
+% Change the order of VE to match Tables 3 and 4
+roi_order = [1:6,10,11,15,7:9,12:14];
+arr_VE = arr_VE(roi_order,:);
+
+
+%% Create an array of p-values to put as stars on the graph
+
+% Load in p-values from the full-model GLM
+load('SickleUK_GLMResultsBG_QSM.mat');
+
+% Pull out the data from the Results table as an array, and transpose it
+arr_pval = table2array(tbl_results)';
+
+% Re-order ARR_PVAL to match the plot order
+arr_pval = arr_pval(:,[1,4,3,2,5,6]);
+
+% Keep only the significant ROIs
+arr_pval = arr_pval(sign_rois,:);
+
+% Delete the first column (p-value of the intercept)
+arr_pval(:,1) = [];
+
+% Change the order
+arr_pval = arr_pval(roi_order,:);
 
 
 %% Plot the Graph
 
 % Bar Chart
-figure('WindowStyle','Normal','Position',[100,200,1100,500]);
-b = barh(flip(100.*arr_Rsquared',1),'Stacked');
-box off;
-yticklabels(flip(roi_names_nice));
+figure('WindowStyle','Normal','Position',[100,200,1100,550]);
+b1 = barh(flip(100.*arr_VE,1),'Stacked');
+box off; hold on;
+yticklabels(flip(roi_names_nice(roi_order)));
 xlabel('Variance Explained (%)');
 
 % Set colours
-b(1).FaceColor = [147,  39,  44]./255;  % UCL Mid Red 100%
-b(2).FaceColor = [  0,  43,  85]./255;  % UCL Mid Blue 100%
-b(3).FaceColor = [143, 153,  62]./255;  % UCL Mid Green 100%
-b(4).FaceColor = [249, 190,   0]./255;  % UCL Yellow 100%
-b(5).FaceColor = [ 98,  32, 113]./255;  % UCL Mid Purple 90%
-b(6).FaceColor = [152, 143, 134]./255;  % UCL Grey 90%
+b1(1).FaceColor = [147,  39,  44]./255;  % UCL Mid Red 100%
+b1(2).FaceColor = [  0,  43,  85]./255;  % UCL Mid Blue 100%
+b1(3).FaceColor = [143, 153,  62]./255;  % UCL Mid Green 100%
+b1(4).FaceColor = [249, 190,   0]./255;  % UCL Yellow 100%
+b1(5).FaceColor = [ 98,  32, 113]./255;  % UCL Mid Purple 90%
+b1(6).FaceColor = [152, 143, 134]./255;  % UCL Grey 90%
 
 % Background colour
 % set(gcf,'color',[201, 147, 150]./255);
 % set(gca,'color',[201, 147, 150]./255);
 
 % Set y axis limits
-set(gca,'YLim',[0.6,length(roi_names)+0.4]);
+set(gca,'YLim',[0.6,length(roi_names_nice)+0.4]);
 set(gca,'FontSize',18);
+
+
+%% Add Significance Stars to the Graph
+
+% Number of segments on the graph
+nseg = length(b1);
+
+arr_endpoints = zeros(nseg+1,nrois);
+
+% Loop over the bar elements and pull out the YEndPoints
+for vv = 1:nseg
+
+    arr_endpoints(vv+1,:) = b1(vv).YEndPoints;
+
+end % for vv = 1:nseg
+
+% Calculate midpoints
+arr_midpoints = flip(((arr_endpoints(1:nseg,:) + arr_endpoints(2:nseg+1,:))./2)',1);
+
+% create y-positions
+arr_ypoints = repmat(15:-1:1,nseg,1)';
+
+% Flip the pval array to match the graph
+arr_pval = flip(arr_pval,1);
+
+% Loop through bars and add significance stars
+%       There is probably a clever way to do this without needing a nested
+%       for-loop, but I don't have time to figure it out
+for rr = 1:nrois
+
+    % Loop through segments (not the last one)
+    for vv = 1:nseg-1
+
+        if arr_pval(rr,vv) < 0.001
+            text(arr_midpoints(rr,vv),arr_ypoints(rr,vv),'***',...
+                 'FontSize',14,...
+                 'Color','w',...
+                 'HorizontalAlignment','center');
+        elseif arr_pval(rr,vv) < 0.01
+            text(arr_midpoints(rr,vv),arr_ypoints(rr,vv),'**',...
+                 'Color','w',...
+                 'FontSize',14,...
+                 'HorizontalAlignment','center');
+        elseif arr_pval(rr,vv) < 0.05
+            text(arr_midpoints(rr,vv),arr_ypoints(rr,vv),'*',...
+                 'Color','w',...
+                 'FontSize',14,...
+                 'HorizontalAlignment','center');
+        end
+
+    end % for vv = 1:nseg-1
+
+end % for rr = 1:nrois 

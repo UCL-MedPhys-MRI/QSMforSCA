@@ -121,6 +121,65 @@ for rr = 1:n_rois
 end % rr = 1:n_rois
 
 
+%% Leave-One-Out Analysis for Variance Explained
+
+% Variables
+var_names = {'Log_Age'; 'Sex'; 'Group'; 'Pegboard_R'; 'Design_fluency' };
+n_var = length(var_names);
+
+% Pre-allocate table to store variance explained results
+tbl_varexp = table(roi_names,res_pv,res_RS);
+
+% Loop over variables to leave out
+for vv = 1:n_var
+
+    % Pull out variable name
+    vname = var_names{vv};
+
+    % Make a list of all the others
+    list_var = var_names;
+    idx = strcmp(var_names,vname);
+    list_var(idx) = [];
+
+    % Construct model spec
+    modelspec_1 = [list_var{1},' + ',list_var{2},' + ',list_var{3},' + ',list_var{4}];
+
+    % Pre-allocate vector for R-squared
+    vec_RS = zeros(n_rois,1);
+
+    % Loop over ROIs and calculate the GLM
+    for rr = 1:n_rois
+
+        rname = roi_names{rr};
+
+        % Construct model spec
+        modelspec = [mname,'_',rname,' ~ ',modelspec_1];
+
+        % Fit GLM
+        varmdl = fitglm(tbl_all,modelspec);
+
+        % Store R-squraed vector
+        vec_RS(rr) = varmdl.Rsquared.Adjusted;
+
+    end % for rr = 1:n_rois 
+
+    % Set negative R^2 values to 0
+    vec_RS(vec_RS<0) = 0;
+
+    % Calculate variance explained by this variable
+    vec_VE = res_RS - vec_RS;
+    vec_VE(vec_VE<0) = 0;
+
+    % Put it in the table
+    tbl_varexp = addvars(tbl_varexp,vec_RS,vec_VE,...
+                         'NewVariableNames',{strcat('RS_',vname),strcat('VE_',vname)});
+
+end % for vv = 1:n_var 
+
+% Save the variance explained data
+save('SickleUK_GLMResults_VarExp.mat','tbl_varexp');
+
+
 %% Univariate Analysis for Variance Explained
 
 % Variables
