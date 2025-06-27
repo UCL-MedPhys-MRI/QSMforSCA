@@ -175,4 +175,4 @@ tbl_all = join(tbl_all,tbl_r2sdata,'Keys','Row');
 
 % Save the table
 writetable(tbl_all,strcat(dir_data,'SickleUK_QSMData_BGanglia.csv'),'WriteRowNames',true);
-save('SickleUK_QSMdata_BGanglia.mat','tbl_all');
+save('SickleUK_QSMData_Test.mat','tbl_all');

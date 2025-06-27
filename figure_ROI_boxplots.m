@@ -27,7 +27,7 @@ colour.p = [ 98,  32, 113]./255;  % UCL Mid Purple 90%
 
 % Load the data
 load('SickleUK_QSMdata_BGanglia.mat');
-load('ROI_names_BG.mat');
+load('ROI_names.mat');
 
 % Data Quantities
 n_subs = height(tbl_all);

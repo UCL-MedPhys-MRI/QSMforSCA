@@ -27,11 +27,11 @@ clearvars
 %% Set-up Script Options
 
 % ROIs
-load('ROI_names_BG.mat');
+load('ROI_names.mat');
 n_rois = length(roi_names);
 
 % Load in data table
-load('SickleUK_QSMdata_BGanglia.mat');
+load('SickleUK_QSMData.mat');
 n_subs = height(tbl_all);
 
 % Choose Modality name 'QSM' or 'R2s'
@@ -121,6 +121,10 @@ for rr = 1:n_rois
 end % rr = 1:n_rois
 
 
+%% Save the Results
+save(strcat('SickleUK_GLMResults_',mname,'.mat'),'tbl_results','res_RS','res_pv','mdl');
+
+
 %% Leave-One-Out Analysis for Variance Explained
 
 % Variables
@@ -179,45 +183,6 @@ end % for vv = 1:n_var
 % Save the variance explained data
 save('SickleUK_GLMResults_VarExp.mat','tbl_varexp');
 
-
-%% Univariate Analysis for Variance Explained
-
-% Variables
-var_names = {'Log_Age'; 'Sex'; 'Group'; 'Pegboard_R'; 'Design_fluency' };
-n_var = length(var_names);
-
-% Pre-allocate array to store R^2 values
-arr_Rsquared = zeros(n_var,n_rois);
-
-% Loop over variables
-for vv = 1:n_var
-
-    vname = var_names{vv};
-
-    % Loop over ROIs
-    for rr = 1:n_rois
-
-        rname = roi_names{rr};
-
-        % Specify model (change "QSM" to "R2s" for R2-star analysis)
-        modelspec = [strcat(mname,'_',rname), ' ~ ', vname];
-
-        % Fit GLM
-        unimdl = fitglm(tbl_all,modelspec);
-
-        % Store p-values
-        arr_Rsquared(vv,rr) = unimdl.Rsquared.Adjusted;
-
-    end % for rr = 1:n_rois
-
-end % for vv = 1:n_var 
-
-% Set negative R^2 values to 0
-arr_Rsquared(arr_Rsquared < 0) = 0;
-
-
-%% Save the Results
-save(strcat('SickleUK_GLMResultsBG_',mname,'.mat'),'tbl_results','res_RS','res_pv','mdl','arr_Rsquared');
 
 
 %% Calculate Regional Averages (for Table)

@@ -1,10 +1,10 @@
-% figure_scatterbox.m
+% figure_scatter2.m
 %
 % Script for generating the scatter graph (with regression line and
 % confidence intervals) for susceptibility (or R2*) values in an ROI, with
-% data split into two groups (e.g. SCA / HC) and also a comparative bar
-% chart next to each one. Data is taken from the Sickle-UK dataset. Stats
-% should be created by SICKLE_EXTRACT_AVERAGES.m
+% data split into two groups (e.g. SCA / HC) and also a comparative box chart
+% next to each one. Data is taken from the Sickle-UK dataset. Stats should be
+% created by SICKLE_EXTRACT_AVERAGES.m 
 % 
 %
 %       Copyright (C) University College London, 2025
@@ -18,9 +18,8 @@
 %       scripts in this folder, ready for the paper.
 %
 % 2025-06-19 (MTC). Forked this script into two, one for the
-%       single-variable scatter plot (this script) and a separate one
-%       (FIGURE_SCATTERBOX.m) for split-variable scatter graph and box
-%       plot.
+%       two-variable scatter plot (this script) and a separate one
+%       (FIGURE_SCATTERROI.m) for single-variable.
 
 
 clearvars;
